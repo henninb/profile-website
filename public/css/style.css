@@ -497,6 +497,7 @@ header {
   transition: height 0.5s, width 0.5s;
   transition-delay: 0s, 0.75s;
   overflow: hidden;
+  z-index: 100;
 }
 
 .navigation.active {
