@@ -14,15 +14,15 @@
 
 let menuToggle = document.querySelector(".menuToggle");
 let navigation = document.querySelector(".navigation");
-menuToggle.onclick = function () {
-  navigation.classList.toggle("active");
-};
-
-let navWrapper = document.querySelector('.nav-wrapper');
-let navToogler = document.querySelector('.nav-toogler')
-
-if ( navToogler ) {
-  navToogler.addEventListener('click', function (event) {
-      navWrapper.classList.toggle('active')
-  })
+if( menuToggle ) {
+  menuToggle.onclick = function () {
+    navigation.classList.toggle("active");
+  };
 }
+
+let navWrapper = document.querySelector('.nav-wrapper'),
+    navToogler =  document.querySelector('.nav-toogler')
+
+navToogler.addEventListener('click', function (event) {
+    navWrapper.classList.toggle('active')
+})
