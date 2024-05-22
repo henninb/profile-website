@@ -14,6 +14,7 @@ const pxConfig = {
   px_auth_token: 'PX_TOKEN',
   px_module_mode: "monitor",
   px_bypass_monitor_header: "x-px-block",
+  px_login_credentials_extraction_enabled: false,
 };
 perimeterx.init(pxConfig);
 
