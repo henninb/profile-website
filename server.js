@@ -9,11 +9,16 @@ const port = process.env.PORT || 3000
 const app = express()
 
 const pxConfig = {
-    px_app_id: 'PX_APP_ID',
-    px_cookie_secret: 'PX_COOKIE_ENCRYPTION_KEY',
-    px_auth_token: 'PX_TOKEN',
+  px_app_id: 'PX_APP_ID',
+  px_cookie_secret: 'PX_COOKIE_ENCRYPTION_KEY',
+  px_auth_token: 'PX_TOKEN',
+  px_module_mode: "monitor",
+  px_bypass_monitor_header: "x-px-block",
 };
 perimeterx.init(pxConfig);
+
+/* block high scored users using px-module for all routes */
+app.use(perimeterx.middleware);
 
 app.listen(port, () => { console.log(`listening on port ${port}`) });
 // app.use(bodyParser.urlencoded({ extended: true }));
