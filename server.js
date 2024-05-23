@@ -18,9 +18,39 @@ const pxConfig = {
   px_login_credentials_extraction_enabled: false,
 };
 
+const PxMiddlewareWrap = (req, res, next) => {
+  if (pxConfig.px_filter_by_route && pxConfig.px_filter_by_route.includes(req.path)){
+    return next();
+  }
+  PxMiddleware(req, res, next);
+};
+
+const setPxMiddleware = (app) => {
+  pxInstance = perimeterx.new(pxConfig)
+  PxMiddleware = pxInstance.middleware;
+  app.use(PxMiddlewareWrap);
+
+  app.use((req, res, next) => {
+    for (const [name, value] of Object.entries(req.headers)) {
+      res.setHeader(name, value);
+    }
+    next();
+  });
+}
+
+
 perimeterx.init(pxConfig);
 
-app.use(perimeterx.middleware);
+var PxMiddleware;
+var pxInstance;
+
+pxInstance = perimeterx.new(pxConfig)
+PxMiddleware = pxInstance.middleware;
+app.use(PxMiddlewareWrap);
+
+setPxMiddleware(app);
+
+//app.use(perimeterx.middleware);
 
 app.listen(port, () => { console.log(`listening on port ${port}`) });
 // app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,6 +77,7 @@ app.post('/api/login', (_, response, next) => {
 //   response.send('Hello World');
 //   next();
 // });
+//
 
 app.get('/helloWorld', (_, response, next) => {
   console.log('hello world');
