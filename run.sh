@@ -5,6 +5,8 @@ if [ ! -x "$(command -v node)" ]; then
   exit 1
 fi
 
+touch config.json
+
 npm install
 npm start
 

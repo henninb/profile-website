@@ -2,21 +2,25 @@
 
 const express = require('express')
 const perimeterx = require('perimeterx-node-express');
+const fs = require('fs');
 //const cors = require('cors');
 //const bodyParser = require('body-parser');
 
 const port = process.env.PORT || 3000
 const app = express()
 
-const pxConfig = {
-  px_app_id: 'PXjJ0cYtn9',
-  px_cookie_secret: '',
-  px_auth_token: '',
-  px_bypass_monitor_header: 'x-px-block',
-  px_module_mode: 'active_blocking',
-  px_logger_severity: 'debug',
-  px_login_credentials_extraction_enabled: false,
-};
+const configPath = './config.json';
+const pxConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+
+// const pxConfig = {
+//   px_app_id: 'PXjJ0cYtn9',
+//   px_cookie_secret: '',
+//   px_auth_token: '',
+//   px_bypass_monitor_header: 'x-px-block',
+//   px_module_mode: 'active_blocking',
+//   px_logger_severity: 'debug',
+//   px_login_credentials_extraction_enabled: false,
+// };
 
 const PxMiddlewareWrap = (req, res, next) => {
   if (pxConfig.px_filter_by_route && pxConfig.px_filter_by_route.includes(req.path)){
