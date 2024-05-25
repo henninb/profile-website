@@ -2,6 +2,7 @@
 
 const express = require('express')
 const perimeterx = require('perimeterx-node-express');
+const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const axios = require('axios');
 //const cors = require('cors');
@@ -15,6 +16,45 @@ const app = express()
 
 const configPath = './config.json';
 const pxConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+
+app.use(cookieParser());
+
+const px_enrich_custom_parameters_old = async (config, request) => {
+    const body = request.method === 'POST' &&
+        request.headers.get('content-type')?.includes('application/json') ?
+        await request.clone().json() : null;
+
+    // let headerCount = 0;
+    // request.headers.forEach(() => {
+    //     headerCount++;
+    // });
+  const headerCount = Object.keys(request.headers).length;
+
+    // Function to get the value of a specific cookie
+    const getCookieValue = (name) => {
+        // const cookies = request.headers.get('cookie');
+        const cookies = request.cookies;
+        if (!cookies) return null;
+        return cookies[name];
+    };
+
+    const pdvidCookieValue = getCookieValue('_pxvid') || 'empty';
+
+    return {
+        custom_param1: 'hardcoded value',
+        // custom_param2: request.headers.get('Cf-Ray'),
+        custom_param3: body?.['body_property'],
+        custom_param4: headerCount.toString(),
+        custom_param5: pdvidCookieValue,
+    };
+};
+
+const px_enrich_custom_parameters = function(customParams, originalRequest) {
+    customParams["custom_param1"] = "yay, test value";
+    return customParams;
+  }
+
+pxConfig.px_enrich_custom_parameters = px_enrich_custom_parameters_old;
 
 app.use((request, response, next) => {
   console.log(`Request URL: ${request.url}`);
