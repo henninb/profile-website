@@ -118,8 +118,10 @@ echo "The Lambda function '$FUNCTION_NAME' has been successfully published."
 PUBLISHED_FUNCTION_ARN=$(aws lambda publish-version --function-name $FUNCTION_NAME --query 'FunctionArn' --output text)
 echo $PUBLISHED_FUNCTION_ARN
 
-aws cloudfront list-origin-access-controls
+# aws cloudfront list-origin-access-controls
 
+OAC_ID=$(aws cloudfront list-origin-access-controls | jq -r '.OriginAccessControlList.Items[] | select(.Name == "bhenning-oac-s3") | .Id')
+if [ -z "$OAC_ID" ]; then
 aws cloudfront create-origin-access-control --origin-access-control-config \
 '{
   "Name": "bhenning-oac-s3",
@@ -128,6 +130,7 @@ aws cloudfront create-origin-access-control --origin-access-control-config \
   "SigningBehavior": "always",
   "OriginAccessControlOriginType": "s3"
 }'
+fi
 
 OAC_ID=$(aws cloudfront list-origin-access-controls | jq -r '.OriginAccessControlList.Items[] | select(.Name == "bhenning-oac-s3") | .Id')
 
