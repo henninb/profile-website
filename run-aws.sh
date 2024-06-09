@@ -1,8 +1,8 @@
 #!/bin/sh
 
-BUCKET_NAME=bhenning-static2-bucket
-ROLE_NAME="edge-lambda1-role"
-FUNCTION_NAME="basic-auth4-function"
+BUCKET_NAME=bhenning-static6-bucket
+ROLE_NAME="edge-lambda6-role"
+FUNCTION_NAME="basic-auth6-function"
 REGION=us-east-1
 CALL_REFERENCE=basic-auth-$(date +%s)
 
@@ -67,14 +67,14 @@ if aws lambda get-function --function-name $FUNCTION_NAME 2>/dev/null; then
   aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://basic-auth.zip
 else
   echo "Lambda function does not exist so create one."
+   STATUS="Pending"
+  while [ "$STATUS" != "Active" ]; do
   aws lambda create-function --function-name $FUNCTION_NAME \
   --runtime nodejs20.x \
   --role "$ROLE_ARN" \
   --handler index.handler \
   --zip-file fileb://basic-auth.zip \
   --region us-east-1
-   STATUS="Pending"
-  while [ "$STATUS" != "Active" ]; do
     sleep 5
     STATUS=$(aws lambda get-function --function-name $FUNCTION_NAME | jq -r '.Configuration.State')
     echo "Creation status: $STATUS"
@@ -120,7 +120,16 @@ echo $PUBLISHED_FUNCTION_ARN
 
 aws cloudfront list-origin-access-controls
 
-OAC_ID=$(aws cloudfront list-origin-access-controls | jq -r '.OriginAccessControlList.Items[] | select(.Name == "bhenning-static2-bucket.s3.us-east-1.amazonaws.com") | .Id')
+aws cloudfront create-origin-access-control --origin-access-control-config \
+'{
+  "Name": "bhenning-oac-s3",
+  "Description": "Origin Access Control for my S3 bucket",
+  "SigningProtocol": "sigv4",
+  "SigningBehavior": "always",
+  "OriginAccessControlOriginType": "s3"
+}'
+
+OAC_ID=$(aws cloudfront list-origin-access-controls | jq -r '.OriginAccessControlList.Items[] | select(.Name == "bhenning-oac-s3") | .Id')
 
 # do I need this?
 # aws lambda add-permission --function-name $FUNCTION_NAME --statement-id AllowCloudFrontService --action lambda:GetFunction --principal edgelambda.amazonaws.com --source-arn "$PUBLISHED_FUNCTION_ARN"
@@ -152,7 +161,7 @@ cat <<  EOF > "$HOME/tmp/bhenning-cloudfront-distribution.json"
         "OriginShield": {
           "Enabled": false
         },
-        "OriginAccessControlId": "E1BA20KXKSLPY3"
+        "OriginAccessControlId": "$OAC_ID"
       }
     ]
   },
